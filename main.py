@@ -36,7 +36,7 @@ def fetch_trends():
 
         if not timeline_container:
             print("Could not find the trends container")
-            return None, None, None
+            return None, None, None, None
 
         # Extract timestamp
         title_element = timeline_container.select_one("h3.title")
@@ -55,10 +55,14 @@ def fetch_trends():
                     # Convert Unix timestamp to datetime in Paris timezone
                     timestamp_float = float(str(timestamp_data))
                     utc_time = datetime.fromtimestamp(timestamp_float, tz=pytz.UTC)
-                    paris_tz = pytz.timezone('Europe/Paris')
+                    paris_tz = pytz.timezone("Europe/Paris")
                     paris_time = utc_time.astimezone(paris_tz)
-                    timestamp_text = paris_time.strftime("Today at %I:%M %p")  # For subject
-                    full_timestamp_text = paris_time.strftime("%A, %B %d, %Y at %I:%M %p (Paris Time)")  # For email body
+                    timestamp_text = paris_time.strftime(
+                        "Today at %I:%M %p"
+                    )  # For subject
+                    full_timestamp_text = paris_time.strftime(
+                        "%A, %B %d, %Y at %I:%M %p (Paris Time)"
+                    )  # For email body
                 except (ValueError, TypeError):
                     # Keep original text if conversion fails
                     pass
@@ -86,17 +90,52 @@ def fetch_trends():
                     {"name": trend_name, "url": trend_url, "tweet_count": tweet_count}
                 )
 
-        return trends, timestamp_text, full_timestamp_text
+        # Extract trends with maximum tweets from the stats section
+        max_tweets_trends = []
+        stats_section = soup.select_one(
+            "body > main > div:nth-child(2) > article > div > section:nth-child(2)"
+        )
+
+        if stats_section:
+            stat_items = stats_section.select("li.stat-card-item")
+            for item in stat_items:
+                trend_link = item.select_one("a.trend-link")
+                if trend_link:
+                    trend_name = trend_link.text.strip()
+                    trend_url = trend_link.get("href", "")
+
+                    item_text = item.get_text(strip=True)
+
+                    if "with " in item_text:
+                        parts = item_text.split("with ")
+                        if len(parts) > 1:
+                            tweet_count = parts[1].strip()
+                        else:
+                            tweet_count = ""
+                    else:
+                        tweet_count = ""
+
+                    max_tweets_trends.append(
+                        {
+                            "name": trend_name,
+                            "url": trend_url,
+                            "tweet_count": tweet_count,
+                        }
+                    )
+        else:
+            print("Could not find the max tweets stats section")
+
+        return trends, timestamp_text, full_timestamp_text, max_tweets_trends
 
     except requests.RequestException as e:
         print(f"Error fetching trends: {e}")
-        return None, None, None
+        return None, None, None, None
     except Exception as e:
         print(f"Error parsing trends: {e}")
-        return None, None, None
+        return None, None, None, None
 
 
-def format_email_content(trends, timestamp):
+def format_email_content(trends, timestamp, max_tweets_trends=None):
     """Format trends data into email content"""
     if not trends:
         return "No trends data available.", "No trends data available."
@@ -208,34 +247,19 @@ def format_email_content(trends, timestamp):
         <section class="stat-card">
             <ol class="stat-card-list" aria-labelledby="max-tweets-stats">
     """
-    
-    # Get top trends with highest tweet counts for the new section
-    trends_with_counts = [trend for trend in trends if trend.get('tweet_count')]
-    # Sort by tweet count (extract numeric value from strings like "7.9M tweet")
-    def extract_tweet_number(tweet_count_str):
-        try:
-            # Remove "tweet" or "tweets" and extract number
-            count_str = tweet_count_str.replace(' tweet', '').replace(' tweets', '').strip()
-            if 'M' in count_str:
-                return float(count_str.replace('M', '')) * 1000000
-            elif 'K' in count_str:
-                return float(count_str.replace('K', '')) * 1000
-            else:
-                return float(count_str)
-        except:
-            return 0
-    
-    trends_with_counts.sort(key=lambda x: extract_tweet_number(x.get('tweet_count', '0')), reverse=True)
-    
-    # Show top 5 trends with maximum tweets
-    for trend in trends_with_counts[:5]:
-        html_content += f"""
+
+    # Use the actual max tweets trends data from the stats section
+    if max_tweets_trends:
+        text_content += "\nTrends with Maximum Tweets\n"
+        for i, trend in enumerate(max_tweets_trends, 1):
+            html_content += f"""
                 <li class="stat-card-item">
                     <a href="{trend['url']}" class="trend-link">{trend['name']}</a>
-                    with {trend['tweet_count']}
+                    with {trend['tweet_count']}s
                 </li>
-        """
-    
+            """
+            text_content += f"{i}. {trend['name']} with {trend['tweet_count']}s\n"
+
     html_content += f"""
             </ol>
         </section>
@@ -300,17 +324,21 @@ def main():
 
     # Fetch trends
     print("📊 Fetching trends from trends24.in...")
-    trends, timestamp, full_timestamp = fetch_trends()
+    trends, timestamp, full_timestamp, max_tweets_trends = fetch_trends()
 
     if not trends:
         print("❌ Failed to fetch trends")
         return
 
     print(f"✅ Found {len(trends)} trends")
+    if max_tweets_trends:
+        print(f"✅ Found {len(max_tweets_trends)} trends with maximum tweets")
 
     # Format email content
     print("📝 Formatting email content...")
-    html_content, text_content = format_email_content(trends, full_timestamp)
+    html_content, text_content = format_email_content(
+        trends, full_timestamp, max_tweets_trends
+    )
 
     # Send email
     print("📧 Sending email...")

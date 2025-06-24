@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import time
+import pytz
 
 
 def fetch_trends():
@@ -48,14 +49,16 @@ def fetch_trends():
             full_timestamp_text = title_element.text.strip()
             timestamp_data = title_element.get("data-timestamp")
 
-            # Convert timestamp to local format if available
+            # Convert timestamp to Paris timezone if available
             if timestamp_data:
                 try:
-                    # Convert Unix timestamp to datetime
+                    # Convert Unix timestamp to datetime in Paris timezone
                     timestamp_float = float(str(timestamp_data))
-                    local_time = datetime.fromtimestamp(timestamp_float)
-                    timestamp_text = local_time.strftime("Today at %I:%M %p")  # For subject
-                    full_timestamp_text = local_time.strftime("%A, %B %d, %Y at %I:%M %p")  # For email body
+                    utc_time = datetime.fromtimestamp(timestamp_float, tz=pytz.UTC)
+                    paris_tz = pytz.timezone('Europe/Paris')
+                    paris_time = utc_time.astimezone(paris_tz)
+                    timestamp_text = paris_time.strftime("Today at %I:%M %p")  # For subject
+                    full_timestamp_text = paris_time.strftime("%A, %B %d, %Y at %I:%M %p (Paris Time)")  # For email body
                 except (ValueError, TypeError):
                     # Keep original text if conversion fails
                     pass
@@ -100,15 +103,90 @@ def format_email_content(trends, timestamp):
 
     html_content = f"""
     <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            h2 {{
+                color: #2c3e50;
+                border-bottom: 3px solid #3498db;
+                padding-bottom: 10px;
+            }}
+            h3 {{
+                color: #495057;
+                font-size: 18px;
+                margin-top: 30px;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }}
+            .main-trends-list {{
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                list-style: decimal;
+                padding-left: 40px;
+            }}
+            .main-trends-list li {{
+                margin-bottom: 8px;
+                line-height: 1.4;
+            }}
+            .stat-card {{
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }}
+            .stat-card-title {{
+                color: #495057;
+                font-size: 18px;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }}
+            .stat-card-list {{
+                list-style: decimal;
+                padding-left: 20px;
+            }}
+            .stat-card-item {{
+                margin-bottom: 8px;
+                line-height: 1.4;
+            }}
+            .trend-link {{
+                color: #007bff;
+                text-decoration: none;
+                font-weight: bold;
+            }}
+            .trend-link:hover {{
+                text-decoration: underline;
+            }}
+            a {{
+                color: #007bff;
+                text-decoration: none;
+            }}
+            a:hover {{
+                text-decoration: underline;
+            }}
+        </style>
+    </head>
     <body>
         <h2>🔥 Current US Trends Summary</h2>
         
-        <h3>All Trending Topics:</h3>
-        <ol>
+        <h3>All Trending Topics</h3>
+        <ol class="main-trends-list">
     """
 
     text_content = f"🔥 Current US Trends Summary\n\n"
-    text_content += "All Trending Topics:\n"
+    text_content += "All Trending Topics\n"
 
     # Show all trends instead of just 20
     for i, trend in enumerate(trends, 1):
@@ -125,6 +203,42 @@ def format_email_content(trends, timestamp):
 
     html_content += f"""
         </ol>
+        
+        <h3>Trends with Maximum Tweets</h3>
+        <section class="stat-card">
+            <ol class="stat-card-list" aria-labelledby="max-tweets-stats">
+    """
+    
+    # Get top trends with highest tweet counts for the new section
+    trends_with_counts = [trend for trend in trends if trend.get('tweet_count')]
+    # Sort by tweet count (extract numeric value from strings like "7.9M tweet")
+    def extract_tweet_number(tweet_count_str):
+        try:
+            # Remove "tweet" or "tweets" and extract number
+            count_str = tweet_count_str.replace(' tweet', '').replace(' tweets', '').strip()
+            if 'M' in count_str:
+                return float(count_str.replace('M', '')) * 1000000
+            elif 'K' in count_str:
+                return float(count_str.replace('K', '')) * 1000
+            else:
+                return float(count_str)
+        except:
+            return 0
+    
+    trends_with_counts.sort(key=lambda x: extract_tweet_number(x.get('tweet_count', '0')), reverse=True)
+    
+    # Show top 5 trends with maximum tweets
+    for trend in trends_with_counts[:5]:
+        html_content += f"""
+                <li class="stat-card-item">
+                    <a href="{trend['url']}" class="trend-link">{trend['name']}</a>
+                    with {trend['tweet_count']}
+                </li>
+        """
+    
+    html_content += f"""
+            </ol>
+        </section>
         
         <p><strong>Timestamp:</strong> {timestamp}</p>
         

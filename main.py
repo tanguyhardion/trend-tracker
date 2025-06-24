@@ -35,15 +35,17 @@ def fetch_trends():
 
         if not timeline_container:
             print("Could not find the trends container")
-            return None, None
+            return None, None, None
 
         # Extract timestamp
         title_element = timeline_container.select_one("h3.title")
         timestamp_text = "Unknown time"
+        full_timestamp_text = "Unknown time"
         timestamp_data = None
 
         if title_element:
             timestamp_text = title_element.text.strip()
+            full_timestamp_text = title_element.text.strip()
             timestamp_data = title_element.get("data-timestamp")
 
             # Convert timestamp to local format if available
@@ -52,7 +54,8 @@ def fetch_trends():
                     # Convert Unix timestamp to datetime
                     timestamp_float = float(str(timestamp_data))
                     local_time = datetime.fromtimestamp(timestamp_float)
-                    timestamp_text = local_time.strftime("Today at %I:%M %p")
+                    timestamp_text = local_time.strftime("Today at %I:%M %p")  # For subject
+                    full_timestamp_text = local_time.strftime("%A, %B %d, %Y at %I:%M %p")  # For email body
                 except (ValueError, TypeError):
                     # Keep original text if conversion fails
                     pass
@@ -80,14 +83,14 @@ def fetch_trends():
                     {"name": trend_name, "url": trend_url, "tweet_count": tweet_count}
                 )
 
-        return trends, timestamp_text
+        return trends, timestamp_text, full_timestamp_text
 
     except requests.RequestException as e:
         print(f"Error fetching trends: {e}")
-        return None, None
+        return None, None, None
     except Exception as e:
         print(f"Error parsing trends: {e}")
-        return None, None
+        return None, None, None
 
 
 def format_email_content(trends, timestamp):
@@ -183,7 +186,7 @@ def main():
 
     # Fetch trends
     print("📊 Fetching trends from trends24.in...")
-    trends, timestamp = fetch_trends()
+    trends, timestamp, full_timestamp = fetch_trends()
 
     if not trends:
         print("❌ Failed to fetch trends")
@@ -193,7 +196,7 @@ def main():
 
     # Format email content
     print("📝 Formatting email content...")
-    html_content, text_content = format_email_content(trends, timestamp)
+    html_content, text_content = format_email_content(trends, full_timestamp)
 
     # Send email
     print("📧 Sending email...")

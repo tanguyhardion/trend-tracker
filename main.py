@@ -143,13 +143,13 @@ def send_email(html_content, text_content, timestamp):
     # Get environment variables
     gmail_email = os.getenv("GMAIL_EMAIL")
     gmail_password = os.getenv("GMAIL_APP_PASSWORD")
-    recipient = os.getenv("EMAIL_RECIPIENT")
+    recipient = os.getenv("RECIPIENT_EMAIL")
 
     if not all([gmail_email, gmail_password, recipient]):
         print("Error: Missing required environment variables:")
         print("- GMAIL_EMAIL", gmail_email)
         print("- GMAIL_APP_PASSWORD", gmail_password)
-        print("- EMAIL_RECIPIENT", recipient)
+        print("- RECIPIENT_EMAIL", recipient)
         return False
 
     try:

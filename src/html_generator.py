@@ -94,10 +94,6 @@ class HTMLGenerator:
             <body>
                 <h2>🔥 US Trends Summary</h2>
                 
-                <div class="summary-card">
-                    <div class="summary-card-title">📈 Total Trends Tracked: {len(trends)}</div>
-                </div>
-                
                 {trends_container}
                 
                 {max_tweets_container}

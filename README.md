@@ -1,14 +1,33 @@
 # Trend Tracker
 
-A simple Python script that fetches current trending topics from trends24.in (United States) and sends a summary via email.
+A modular Python application that fetches current trending topics from trends24.in (United States) and sends beautifully formatted email summaries with a dark theme.
 
 ## Features
 
 - 🔍 Scrapes trending topics from trends24.in
 - 📊 Extracts trend names, URLs, and tweet counts
-- 📧 Sends formatted email summaries (HTML + plain text)
+- 📧 Sends beautifully formatted email summaries with dark theme
 - ⏰ Includes timestamp information
 - 🛡️ Uses environment variables for secure email configuration
+- 🏗️ Modular architecture with separate services
+
+## Project Structure
+
+```
+trend-tracker/
+├── main.py                 # Entry point
+├── requirements.txt        # Python dependencies
+├── .env.example           # Environment variables template
+├── src/
+│   ├── __init__.py
+│   ├── main.py            # Main application logic
+│   ├── config.py          # Configuration management
+│   ├── trend_fetcher.py   # Trend fetching service
+│   ├── email_service.py   # Email sending service
+│   └── html_generator.py  # HTML email generation
+└── styles/
+    └── email.css          # Dark theme email styling
+```
 
 ## Setup
 
@@ -20,24 +39,38 @@ pip install -r requirements.txt
 
 ### 2. Environment Variables
 
-Set up the following environment variables:
+Create a `.env` file in the project root (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Then edit the `.env` file with your actual values:
+
+```env
+GMAIL_EMAIL=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
+RECIPIENT_EMAIL=recipient@example.com
+```
+
+Alternatively, set up the following environment variables manually:
 
 - `GMAIL_EMAIL`: Your Gmail address
 - `GMAIL_APP_PASSWORD`: Your Gmail app password (not regular password)
-- `EMAIL_RECIPIENT`: Email address to send the summary to
+- `RECIPIENT_EMAIL`: Email address to send the summary to
 
 #### Windows (Command Prompt):
 ```cmd
 set GMAIL_EMAIL=your-email@gmail.com
 set GMAIL_APP_PASSWORD=your-app-password
-set EMAIL_RECIPIENT=recipient@example.com
+set RECIPIENT_EMAIL=recipient@example.com
 ```
 
 #### Windows (PowerShell):
 ```powershell
 $env:GMAIL_EMAIL="your-email@gmail.com"
 $env:GMAIL_APP_PASSWORD="your-app-password"
-$env:EMAIL_RECIPIENT="recipient@example.com"
+$env:RECIPIENT_EMAIL="recipient@example.com"
 ```
 
 ### 3. Gmail App Password Setup
@@ -88,11 +121,23 @@ The script handles common errors:
 - Email sending failures
 - Website structure changes
 
+## Email Design
+
+The email features a modern dark theme design inspired by professional dashboards:
+
+- 🌙 **Dark Theme**: Black background with white text for better readability
+- 🎨 **Color-coded Sections**: Different accent colors for different trend categories
+- 📱 **Responsive Layout**: Works well on both desktop and mobile email clients
+- 🔗 **Interactive Links**: Clickable trend names that open Twitter/X searches
+- 📊 **Organized Data**: Clear separation between main trends and max tweets trends
+
 ## Dependencies
 
 - `requests`: For web scraping
 - `beautifulsoup4`: For HTML parsing
 - `lxml`: For faster XML/HTML parsing
+- `pytz`: For timezone handling
+- `python-dotenv`: For environment variable management
 - `smtplib`: For sending emails (built-in)
 
 ## License

@@ -1,0 +1,178 @@
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #ffffff !important;
+  background-color: #000000;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h2 {
+  color: #ffffff !important;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+}
+
+h3 {
+  color: #ffffff !important;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+
+.trends-list {
+  list-style: decimal;
+  padding-left: 40px;
+  margin: 20px 0;
+}
+
+.trends-list li {
+  margin-bottom: 12px;
+  line-height: 1.4;
+  padding: 8px;
+  background-color: #2d2d2d;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffffff !important;
+}
+
+.trends-container {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin: 15px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.trends-header {
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #2d2d2d;
+  padding: 15px 20px;
+  margin: 0;
+  border-bottom: 2px solid #333;
+}
+
+.trends-content {
+  padding: 15px 20px;
+}
+
+.trend-item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: #2d2d2d;
+  border-radius: 6px;
+  border-left: 4px solid #e74c3c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffffff !important;
+}
+
+.trend-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.trend-link:hover {
+  text-decoration: underline;
+}
+
+.tweet-count {
+  color: #cccccc !important;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.max-tweets-container {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin: 15px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.max-tweets-header {
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #2d2d2d;
+  padding: 15px 20px;
+  margin: 0;
+  border-bottom: 2px solid #333;
+}
+
+.max-tweets-content {
+  padding: 15px 20px;
+}
+
+.max-tweets-item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: #2d2d2d;
+  border-radius: 6px;
+  border-left: 4px solid #f39c12;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffffff !important;
+}
+
+.summary-card {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.summary-card-title {
+  color: #ffffff !important;
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.timestamp {
+  color: #cccccc !important;
+  font-style: italic;
+  margin-top: 30px;
+  text-align: center;
+}
+
+.footer {
+  border-top: 2px solid #333;
+  margin-top: 30px;
+  padding-top: 20px;
+  text-align: center;
+  color: #cccccc !important;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Additional rules to ensure white text in email clients */
+p,
+div,
+span,
+li {
+  color: #ffffff !important;
+}
+
+em,
+strong {
+  color: #ffffff !important;
+}
+
+small {
+  color: #cccccc !important;
+}

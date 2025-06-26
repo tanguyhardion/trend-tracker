@@ -92,8 +92,6 @@ class HTMLGenerator:
                 </style>
             </head>
             <body>
-                <h2>🔥 US Trends Summary</h2>
-                
                 {trends_container}
                 
                 {max_tweets_container}

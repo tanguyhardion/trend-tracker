@@ -67,7 +67,7 @@ class HTMLGenerator:
 
         return f"""
                         <div class="max-tweets-container">
-                            <div class="max-tweets-header">📊 Trends with Maximum Tweets ({len(max_tweets_trends)} trends)</div>
+                            <div class="max-tweets-header">📊 Trends with Maximum Tweets</div>
                             <div class="max-tweets-content">
                                 {''.join(trends_html)}
                             </div>

@@ -8,18 +8,6 @@ body {
   padding: 20px;
 }
 
-h2 {
-  color: #ffffff !important;
-  border-bottom: 3px solid #3498db;
-  padding-bottom: 10px;
-}
-
-h3 {
-  color: #ffffff !important;
-  margin-top: 30px;
-  margin-bottom: 15px;
-}
-
 .trends-list {
   list-style: decimal;
   padding-left: 40px;

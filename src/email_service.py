@@ -14,14 +14,15 @@ class EmailService:
     def __init__(self):
         self.html_generator = HTMLGenerator()
 
-    def _validate_email_config(self) -> bool:
-        """Validate email configuration and print helpful messages."""
+    def _validate_email_config(self) -> None:
+        """Validate email configuration and raise error if invalid."""
         if not Config.has_email_config():
             missing_vars = Config.get_missing_email_vars()
-            print("Gmail credentials missing - skipping email notification")
-            print(f"Required environment variables: {', '.join(missing_vars)}")
-            return False
-        return True
+            msg = (
+                "Gmail credentials missing - skipping email notification\n"
+                f"Required environment variables: {', '.join(missing_vars)}"
+            )
+            raise ValueError(msg)
 
     def _create_email_message(
         self, 
@@ -68,8 +69,7 @@ class EmailService:
         Returns:
             bool: True if email was sent successfully, False otherwise
         """
-        if not self._validate_email_config():
-            return False
+        self._validate_email_config()
 
         if not trends:
             print("No trends to notify about")

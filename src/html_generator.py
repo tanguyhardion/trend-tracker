@@ -49,7 +49,7 @@ class HTMLGenerator:
 
         return f"""
                         <div class="trends-container">
-                            <div class="trends-header">🔥 All Trending Topics ({len(trends)} trends)</div>
+                            <div class="trends-header">🔥 All Trending Topics</div>
                             <div class="trends-content">
                                 {''.join(trends_html)}
                             </div>

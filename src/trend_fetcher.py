@@ -36,7 +36,7 @@ class TrendFetcher:
                     paris_time = utc_time.astimezone(paris_tz)
                     timestamp_text = paris_time.strftime("Today at %I:%M %p")
                     full_timestamp_text = paris_time.strftime(
-                        "%A, %B %d, %Y at %I:%M %p (Paris Time)"
+                        "%I:%M %p"
                     )
                 except (ValueError, TypeError):
                     pass

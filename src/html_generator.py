@@ -25,8 +25,12 @@ class HTMLGenerator:
 
     def _create_trend_html(self, trend: Dict[str, Any], index: int) -> str:
         """Create HTML for a single trend."""
-        tweet_info = f" <span class='tweet-count'>({trend['tweet_count']} tweets)</span>" if trend.get('tweet_count') else ""
-        
+        tweet_info = (
+            f" <span class='tweet-count'>({trend['tweet_count']} tweets)</span>"
+            if trend.get("tweet_count")
+            else ""
+        )
+
         return f"""
                 <div class="trend-item">
                     {index}. <a href='{trend['url']}' target='_blank' class='trend-link'>{trend['name']}</a>{tweet_info}
@@ -46,7 +50,7 @@ class HTMLGenerator:
         for i, trend in enumerate(trends, 1):
             trend_html = self._create_trend_html(trend, i)
             trends_html.append(trend_html)
-    
+
         return f"""
                         <div class="trends-container">
                             <div class="trends-header">
@@ -58,11 +62,13 @@ class HTMLGenerator:
                             </div>
                         </div>"""
 
-    def _create_max_tweets_container(self, max_tweets_trends: List[Dict[str, Any]]) -> str:
+    def _create_max_tweets_container(
+        self, max_tweets_trends: List[Dict[str, Any]]
+    ) -> str:
         """Create HTML container for max tweets trends."""
         if not max_tweets_trends:
             return ""
-            
+
         trends_html = []
         for trend in max_tweets_trends:
             trend_html = self._create_max_tweets_trend_html(trend)
@@ -77,15 +83,17 @@ class HTMLGenerator:
                         </div>"""
 
     def generate_email_html(
-        self, 
-        trends: List[Dict[str, Any]], 
+        self,
+        trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None
+        max_tweets_trends: List[Dict[str, Any]] = None,
     ) -> str:
         """Generate complete HTML email body."""
         css_content = self._load_css()
         trends_container = self._create_trends_container(trends)
-        max_tweets_container = self._create_max_tweets_container(max_tweets_trends or [])
+        max_tweets_container = self._create_max_tweets_container(
+            max_tweets_trends or []
+        )
 
         return f"""
             <html>

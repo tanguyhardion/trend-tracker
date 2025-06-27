@@ -25,10 +25,10 @@ class EmailService:
             raise ValueError(msg)
 
     def _create_email_message(
-        self, 
-        trends: List[Dict[str, Any]], 
+        self,
+        trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None
+        max_tweets_trends: List[Dict[str, Any]] = None,
     ) -> MIMEMultipart:
         """Create the email message with HTML content."""
         message = MIMEMultipart("alternative")
@@ -53,10 +53,10 @@ class EmailService:
             server.send_message(message)
 
     def send_notification(
-        self, 
-        trends: List[Dict[str, Any]], 
+        self,
+        trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None
+        max_tweets_trends: List[Dict[str, Any]] = None,
     ) -> bool:
         """
         Send email notification for detected trends.

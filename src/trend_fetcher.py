@@ -35,9 +35,7 @@ class TrendFetcher:
                     paris_tz = pytz.timezone("Europe/Paris")
                     paris_time = utc_time.astimezone(paris_tz)
                     timestamp_text = paris_time.strftime("Today at %I:%M %p")
-                    full_timestamp_text = paris_time.strftime(
-                        "%I:%M %p"
-                    )
+                    full_timestamp_text = paris_time.strftime("%I:%M %p")
                 except (ValueError, TypeError):
                     pass
 
@@ -63,11 +61,9 @@ class TrendFetcher:
                     if count_data:
                         tweet_count = tweet_count_span.text.strip()
 
-                trends.append({
-                    "name": trend_name,
-                    "url": trend_url,
-                    "tweet_count": tweet_count
-                })
+                trends.append(
+                    {"name": trend_name, "url": trend_url, "tweet_count": tweet_count}
+                )
 
         return trends
 
@@ -93,20 +89,29 @@ class TrendFetcher:
                     else:
                         tweet_count = ""
 
-                    max_tweets_trends.append({
-                        "name": trend_name,
-                        "url": trend_url,
-                        "tweet_count": tweet_count,
-                    })
+                    max_tweets_trends.append(
+                        {
+                            "name": trend_name,
+                            "url": trend_url,
+                            "tweet_count": tweet_count,
+                        }
+                    )
         else:
             print("Could not find the max tweets stats section")
 
         return max_tweets_trends
 
-    def fetch_trends(self) -> Tuple[Optional[List[Dict[str, Any]]], Optional[str], Optional[str], Optional[List[Dict[str, Any]]]]:
+    def fetch_trends(
+        self,
+    ) -> Tuple[
+        Optional[List[Dict[str, Any]]],
+        Optional[str],
+        Optional[str],
+        Optional[List[Dict[str, Any]]],
+    ]:
         """
         Fetch trends from trends24.in.
-        
+
         Returns:
             Tuple of (trends, timestamp_text, full_timestamp_text, max_tweets_trends)
         """
@@ -126,7 +131,9 @@ class TrendFetcher:
                 return None, None, None, None
 
             # Extract timestamp
-            timestamp_text, full_timestamp_text = self._extract_timestamp(timeline_container)
+            timestamp_text, full_timestamp_text = self._extract_timestamp(
+                timeline_container
+            )
 
             # Extract main trends
             trends = self._extract_main_trends(timeline_container)

@@ -51,7 +51,7 @@ class HTMLGenerator:
                         <div class="trends-container">
                             <div class="trends-header">
                                 <span class="header-text">🔥 All Trending Topics</span>
-                                <a href="https://x.com/explore/trending" target="_blank" class="x-icon-link">𝕏</a>
+                                <a href="https://x.com/explore/tabs/trending" target="_blank" class="x-icon-link">𝕏</a>
                             </div>
                             <div class="trends-content">
                                 {''.join(trends_html)}

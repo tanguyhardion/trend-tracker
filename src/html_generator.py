@@ -46,10 +46,13 @@ class HTMLGenerator:
         for i, trend in enumerate(trends, 1):
             trend_html = self._create_trend_html(trend, i)
             trends_html.append(trend_html)
-
+    
         return f"""
                         <div class="trends-container">
-                            <div class="trends-header">🔥 All Trending Topics</div>
+                            <div class="trends-header">
+                                <span class="header-text">🔥 All Trending Topics</span>
+                                <a href="https://x.com/explore/trending" target="_blank" class="x-icon-link">𝕏</a>
+                            </div>
                             <div class="trends-content">
                                 {''.join(trends_html)}
                             </div>

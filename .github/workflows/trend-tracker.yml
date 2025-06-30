@@ -2,8 +2,7 @@ name: Trend Tracker
 
 on:
   schedule:
-    # Run every 30 minutes
-    - cron: '0,30 * * * *'
+    - cron: '*/30 7-23 * * *'
   # Allow manual trigger
   workflow_dispatch:
 

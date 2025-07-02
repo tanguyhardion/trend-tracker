@@ -2,7 +2,7 @@ name: Trend Tracker
 
 on:
   schedule:
-    - cron: '*/30 7-23 * * *'
+    - cron: '*/15 7-23 * * *'
   # Allow manual trigger
   workflow_dispatch:
 

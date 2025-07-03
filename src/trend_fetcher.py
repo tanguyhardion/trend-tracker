@@ -11,95 +11,69 @@ class TrendFetcher:
     """Fetches trends from trends24.in."""
 
     def __init__(self):
-        self.base_url = "https://trends24.in/united-states/"
+        self.base_url = "https://getdaytrends.com/united-states/"
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
-    def _extract_timestamp(self, timeline_container) -> Tuple[str, str]:
-        """Extract and format timestamp from the timeline container."""
-        title_element = timeline_container.select_one("h3.title")
-        timestamp_text = "Unknown time"
-        full_timestamp_text = "Unknown time"
-
-        if title_element:
-            timestamp_text = title_element.text.strip()
-            full_timestamp_text = title_element.text.strip()
-            timestamp_data = title_element.get("data-timestamp")
-
-            # Convert timestamp to Paris timezone if available
-            if timestamp_data:
-                try:
-                    timestamp_float = float(str(timestamp_data))
-                    utc_time = datetime.fromtimestamp(timestamp_float, tz=pytz.UTC)
-                    paris_tz = pytz.timezone("Europe/Paris")
-                    paris_time = utc_time.astimezone(paris_tz)
-                    timestamp_text = paris_time.strftime("Today at %I:%M %p")
-                    full_timestamp_text = paris_time.strftime("%I:%M %p")
-                except (ValueError, TypeError):
-                    pass
-
-        return timestamp_text, full_timestamp_text
-
-    def _extract_main_trends(self, timeline_container) -> List[Dict[str, Any]]:
-        """Extract main trends from the timeline container."""
+    def _extract_main_trends(self, soup) -> List[Dict[str, Any]]:
+        """Extract main trends from the getdaytrends.com page, including 'see more' table and tweet counts."""
         trends = []
-        trend_items = timeline_container.select("li")
-
-        for item in trend_items:
-            trend_link = item.select_one("a.trend-link")
-            tweet_count_span = item.select_one("span.tweet-count")
-
-            if trend_link:
-                trend_name = trend_link.text.strip()
-                trend_url = trend_link.get("href", "")
-
-                # Get tweet count
-                tweet_count = ""
-                if tweet_count_span:
-                    count_data = tweet_count_span.get("data-count", "")
-                    if count_data:
-                        tweet_count = tweet_count_span.text.strip()
-
-                trends.append(
-                    {"name": trend_name, "url": trend_url, "tweet_count": tweet_count}
-                )
-
+        # First table (top trends)
+        trend_rows = soup.select(
+            "#trends > table.table.table-hover.text-left.clickable.ranking.trends.wider.mb-0 > tbody > tr"
+        )
+        for row in trend_rows:
+            name_link = row.select_one("td.main > a")
+            tweet_count_div = row.select_one("td.main > div")
+            tweet_count = tweet_count_div.text.strip() if tweet_count_div else ""
+            if name_link:
+                trend_name = name_link.text.strip()
+                trend_url = name_link.get("href", "")
+                trends.append({"name": trend_name, "url": trend_url, "tweet_count": tweet_count})
+        # Second table (see more trends)
+        more_trend_rows = soup.select("#moreTrends > tbody > tr")
+        for row in more_trend_rows:
+            name_link = row.select_one("td.main > a")
+            tweet_count_span = row.select_one("td.main > div > span")
+            tweet_count = tweet_count_span.text.strip() if tweet_count_span else ""
+            if name_link:
+                trend_name = name_link.text.strip()
+                trend_url = name_link.get("href", "")
+                trends.append({"name": trend_name, "url": trend_url, "tweet_count": tweet_count})
         return trends
 
-    def _extract_max_tweets_trends(self, soup) -> List[Dict[str, Any]]:
-        """Extract trends with maximum tweets from the stats section."""
-        max_tweets_trends = []
-        stats_section = soup.select_one(
-            "body > main > div:nth-child(2) > article > div > section:nth-child(2)"
+    def _extract_most_tweeted_trends(self, soup) -> List[Dict[str, Any]]:
+        """Extract most tweeted (24h) trends from the right sidebar table."""
+        trends = []
+        rows = soup.select(
+            "body > main > div > div > div.col-12.col-lg-4.mb-2.mb-sm-4.text-center > section > div > div.inset.mb-3 > table > tbody > tr"
         )
+        for row in rows:
+            name_link = row.select_one("td.main > a")
+            tweet_count_td = row.select_one("td.details.small.text-muted.text-right")
+            tweet_count = tweet_count_td.text.strip() if tweet_count_td else ""
+            if name_link:
+                trend_name = name_link.text.strip()
+                trend_url = name_link.get("href", "")
+                trends.append({"name": trend_name, "url": trend_url, "tweet_count": tweet_count})
+        return trends
 
-        if stats_section:
-            stat_items = stats_section.select("li.stat-card-item")
-            for item in stat_items:
-                trend_link = item.select_one("a.trend-link")
-                if trend_link:
-                    trend_name = trend_link.text.strip()
-                    trend_url = trend_link.get("href", "")
-                    item_text = item.get_text(strip=True)
-
-                    if "with " in item_text:
-                        parts = item_text.split("with ")
-                        tweet_count = parts[1].strip() if len(parts) > 1 else ""
-                    else:
-                        tweet_count = ""
-
-                    max_tweets_trends.append(
-                        {
-                            "name": trend_name,
-                            "url": trend_url,
-                            "tweet_count": tweet_count,
-                        }
-                    )
-        else:
-            print("Could not find the max tweets stats section")
-
-        return max_tweets_trends
+    def _extract_longest_trending_trends(self, soup) -> List[Dict[str, Any]]:
+        """Extract longest trending trends from the sidebar table."""
+        trends = []
+        rows = soup.select(
+            "body > main > div > div > div.col-12.col-lg-4.mb-2.mb-sm-4.text-center > section > div > div:nth-child(3) > table > tbody > tr"
+        )
+        for row in rows:
+            name_link = row.select_one("td.main > a")
+            time_trending_td = row.select_one("td.details.small.text-muted.text-right")
+            time_trending = time_trending_td.text.strip() if time_trending_td else ""
+            if name_link:
+                trend_name = name_link.text.strip()
+                trend_url = name_link.get("href", "")
+                trends.append({"name": trend_name, "url": trend_url, "time_trending": time_trending})
+        return trends
 
     def fetch_trends(
         self,
@@ -108,44 +82,30 @@ class TrendFetcher:
         Optional[str],
         Optional[str],
         Optional[List[Dict[str, Any]]],
+        Optional[List[Dict[str, Any]]],
     ]:
         """
-        Fetch trends from trends24.in.
+        Fetch trends from getdaytrends.com.
 
         Returns:
-            Tuple of (trends, timestamp_text, full_timestamp_text, max_tweets_trends)
+            Tuple of (trends, timestamp_text, full_timestamp_text, most_tweeted_trends, longest_trending_trends)
         """
         try:
             response = requests.get(self.base_url, headers=self.headers)
             response.raise_for_status()
-
             soup = BeautifulSoup(response.content, "html.parser")
 
-            # Find the timeline container with the trends
-            timeline_container = soup.select_one(
-                "#timeline-container > div.px-2.scroll-smooth.flex.gap-x-4.w-fit.pt-8 > div:nth-child(1)"
-            )
-
-            if not timeline_container:
-                print("Could not find the trends container")
-                return None, None, None, None
-
-            # Extract timestamp
-            timestamp_text, full_timestamp_text = self._extract_timestamp(
-                timeline_container
-            )
-
             # Extract main trends
-            trends = self._extract_main_trends(timeline_container)
+            trends = self._extract_main_trends(soup)
+            # Extract most tweeted (24h) trends
+            most_tweeted_trends = self._extract_most_tweeted_trends(soup)
+            # Extract longest trending trends
+            longest_trending_trends = self._extract_longest_trending_trends(soup)
 
-            # Extract trends with maximum tweets
-            max_tweets_trends = self._extract_max_tweets_trends(soup)
-
-            return trends, timestamp_text, full_timestamp_text, max_tweets_trends
-
+            return trends, None, None, most_tweeted_trends, longest_trending_trends
         except requests.RequestException as e:
             print(f"Error fetching trends: {e}")
-            return None, None, None, None
+            return None, None, None, None, None
         except Exception as e:
             print(f"Error parsing trends: {e}")
-            return None, None, None, None
+            return None, None, None, None, None

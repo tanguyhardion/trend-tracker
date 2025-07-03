@@ -26,21 +26,21 @@ class HTMLGenerator:
     def _create_trend_html(self, trend: Dict[str, Any], index: int) -> str:
         """Create HTML for a single trend."""
         tweet_info = (
-            f" <span class='tweet-count'>({trend['tweet_count']} tweets)</span>"
+            f" <span class='tweet-count'>({trend['tweet_count']})</span>"
             if trend.get("tweet_count")
             else ""
         )
 
         return f"""
                 <div class="trend-item">
-                    {index}. <a href='{trend['url']}' target='_blank' class='trend-link'>{trend['name']}</a>{tweet_info}
+                    {index}. <a href='https://x.com/search?q={trend['name']}' target='_blank' class='trend-link'>{trend['name']}</a>{tweet_info}
                 </div>"""
 
     def _create_max_tweets_trend_html(self, trend: Dict[str, Any]) -> str:
         """Create HTML for a single max tweets trend."""
         return f"""
                 <div class="max-tweets-item">
-                    <a href='{trend['url']}' target='_blank' class='trend-link'>{trend['name']}</a>
+                    <a href='https://x.com/search?q={trend['name']}' target='_blank' class='trend-link'>{trend['name']}</a>
                     <span class='tweet-count'>with {trend['tweet_count']}</span>
                 </div>"""
 
@@ -62,21 +62,46 @@ class HTMLGenerator:
                             </div>
                         </div>"""
 
-    def _create_max_tweets_container(
-        self, max_tweets_trends: List[Dict[str, Any]]
+    def _create_most_tweeted_container(
+        self, most_tweeted_trends: List[Dict[str, Any]]
     ) -> str:
-        """Create HTML container for max tweets trends."""
-        if not max_tweets_trends:
+        """Create HTML container for most tweeted (24h) trends."""
+        if not most_tweeted_trends:
             return ""
 
         trends_html = []
-        for trend in max_tweets_trends:
+        for trend in most_tweeted_trends:
             trend_html = self._create_max_tweets_trend_html(trend)
             trends_html.append(trend_html)
 
         return f"""
                         <div class="max-tweets-container">
-                            <div class="max-tweets-header">📊 Trends with Maximum Tweets</div>
+                            <div class="max-tweets-header">📊 Most Tweeted (24h)</div>
+                            <div class="max-tweets-content">
+                                {''.join(trends_html)}
+                            </div>
+                        </div>"""
+
+    def _create_longest_trending_container(
+        self, longest_trending_trends: List[Dict[str, Any]]
+    ) -> str:
+        print(f"[DEBUG] _create_longest_trending_container called with {len(longest_trending_trends)} items.")
+        if longest_trending_trends:
+            print(f"[DEBUG] First longest trending trend: {longest_trending_trends[0]}")
+        else:
+            print("[DEBUG] No longest trending trends found.")
+        trends_html = []
+        for trend in longest_trending_trends:
+            print(f"[DEBUG] Adding trend to HTML: {trend}")
+            trend_html = f"""
+                <div class='max-tweets-item'>
+                    <a href='https://x.com/search?q={trend['name']}' target='_blank' class='trend-link'>{trend['name']}</a>
+                    <span class='tweet-count'>for {trend['time_trending']}</span>
+                </div>"""
+            trends_html.append(trend_html)
+        return f"""
+                        <div class="max-tweets-container">
+                            <div class="max-tweets-header">⏳ Longest Trending</div>
                             <div class="max-tweets-content">
                                 {''.join(trends_html)}
                             </div>
@@ -86,15 +111,18 @@ class HTMLGenerator:
         self,
         trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None,
+        most_tweeted_trends: List[Dict[str, Any]] = None,
+        longest_trending_trends: List[Dict[str, Any]] = None,
     ) -> str:
-        """Generate complete HTML email body."""
+        print(f"[DEBUG] generate_email_html called. Trends: {len(trends)}, Most Tweeted: {len(most_tweeted_trends or [])}, Longest Trending: {len(longest_trending_trends or [])}")
         css_content = self._load_css()
         trends_container = self._create_trends_container(trends)
-        max_tweets_container = self._create_max_tweets_container(
-            max_tweets_trends or []
+        most_tweeted_container = self._create_most_tweeted_container(
+            most_tweeted_trends or []
         )
-
+        longest_trending_container = self._create_longest_trending_container(
+            longest_trending_trends or []
+        )
         return f"""
             <html>
             <head>
@@ -104,13 +132,11 @@ class HTMLGenerator:
             </head>
             <body>
                 {trends_container}
-                
-                {max_tweets_container}
-                
+                {most_tweeted_container}
+                {longest_trending_container}
                 <div class="timestamp">
                     <strong>Timestamp:</strong> {timestamp}
                 </div>
-                
                 <div class="footer">
                     <p><em>This is an automated notification from your trend tracking system.</em></p>
                     <p><small>Click on any trend link to view it on Twitter/X</small></p>

@@ -28,7 +28,8 @@ class EmailService:
         self,
         trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None,
+        most_tweeted_trends: List[Dict[str, Any]] = None,
+        longest_trending_trends: List[Dict[str, Any]] = None,
     ) -> MIMEMultipart:
         """Create the email message with HTML content."""
         message = MIMEMultipart("alternative")
@@ -38,7 +39,7 @@ class EmailService:
 
         # Generate HTML content
         html_body = self.html_generator.generate_email_html(
-            trends, timestamp, max_tweets_trends
+            trends, timestamp, most_tweeted_trends, longest_trending_trends
         )
         html_part = MIMEText(html_body, "html")
         message.attach(html_part)
@@ -56,7 +57,8 @@ class EmailService:
         self,
         trends: List[Dict[str, Any]],
         timestamp: str,
-        max_tweets_trends: List[Dict[str, Any]] = None,
+        most_tweeted_trends: List[Dict[str, Any]] = None,
+        longest_trending_trends: List[Dict[str, Any]] = None,
     ) -> bool:
         """
         Send email notification for detected trends.
@@ -64,7 +66,8 @@ class EmailService:
         Args:
             trends: List of trend dictionaries
             timestamp: Timestamp string for the email
-            max_tweets_trends: List of max tweets trend dictionaries
+            most_tweeted_trends: List of most tweeted trend dictionaries
+            longest_trending_trends: List of longest trending trend dictionaries
 
         Returns:
             bool: True if email was sent successfully, False otherwise
@@ -76,7 +79,7 @@ class EmailService:
             return False
 
         try:
-            message = self._create_email_message(trends, timestamp, max_tweets_trends)
+            message = self._create_email_message(trends, timestamp, most_tweeted_trends, longest_trending_trends)
             self._send_via_smtp(message)
             print(f"✅ Email notification sent to {Config.RECIPIENT_EMAIL}")
             return True

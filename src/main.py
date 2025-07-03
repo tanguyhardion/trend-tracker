@@ -1,4 +1,5 @@
 """Main entry point for the trend tracker."""
+from datetime import datetime
 
 from .trend_fetcher import TrendFetcher
 from .email_service import EmailService
@@ -15,32 +16,48 @@ def run_trend_tracker():
     db = init_firebase()
 
     # Fetch trends
-    print("📊 Fetching trends from trends24.in...")
-    trends, timestamp, full_timestamp, max_tweets_trends = trend_fetcher.fetch_trends()
+    print("📊 Fetching trends from getdaytrends.com...")
+    fetch_result = trend_fetcher.fetch_trends()
+    print(f"[DEBUG] fetch_trends() returned: {[type(x) for x in fetch_result]}")
+    trends = fetch_result[0]
+    most_tweeted_trends = fetch_result[3] if len(fetch_result) > 3 else None
+    longest_trending_trends = fetch_result[4] if len(fetch_result) > 4 else None
+    print(f"[DEBUG] trends: {len(trends) if trends else 0}, most_tweeted_trends: {len(most_tweeted_trends) if most_tweeted_trends else 0}, longest_trending_trends: {len(longest_trending_trends) if longest_trending_trends else 0}")
 
     if not trends:
         print("❌ Failed to fetch trends")
         return False
 
     print(f"✅ Found {len(trends)} trends")
-    if max_tweets_trends:
-        print(f"✅ Found {len(max_tweets_trends)} trends with maximum tweets")
+    if most_tweeted_trends:
+        print(f"✅ Found {len(most_tweeted_trends)} most tweeted (24h) trends")
+    if longest_trending_trends:
+        print(f"✅ Found {len(longest_trending_trends)} longest trending trends")
 
-    # Check Firestore for sent timestamp
-    sent_ref = db.collection("sent_trend_emails").document(str(full_timestamp))
-    sent_doc = sent_ref.get()
-    if sent_doc.exists:
-        print(f"⏩ Email for timestamp {full_timestamp} already sent. Skipping.")
-        return False
+    # Get current timestamp for email in a human-readable format
+    now = datetime.now()
+    timestamp_str = now.strftime("Today at %I:%M %p")
 
-    # Send email
-    print("📧 Sending email...")
-    success = email_service.send_notification(trends, full_timestamp, max_tweets_trends)
-
-    if success:
-        sent_ref.set({"timestamp": full_timestamp})
-        print("🎉 Trend summary sent successfully!")
-        return True
-    else:
-        print("💥 Failed to send email")
-        return False
+    # Store and check trends in Firestore
+    trends_collection = db.collection("trend_snapshots")
+    trends_doc = trends_collection.document("latest")
+    doc = trends_doc.get()
+    current_trend_names = [t['name'] for t in trends]
+    send_email = True
+    if doc.exists and doc.to_dict() is not None:
+        prev_trends = doc.to_dict().get("trend_names", [])
+        if set(prev_trends) == set(current_trend_names):
+            print("⏩ Trends unchanged. Skipping email.")
+            send_email = False
+    if send_email:
+        print("📧 Sending email...")
+        print(f"[DEBUG] Sending with most_tweeted_trends: {len(most_tweeted_trends) if most_tweeted_trends else 0}, longest_trending_trends: {len(longest_trending_trends) if longest_trending_trends else 0}")
+        success = email_service.send_notification(trends, timestamp_str, most_tweeted_trends, longest_trending_trends)
+        if success:
+            trends_doc.set({"trend_names": current_trend_names, "timestamp": timestamp_str})
+            print("🎉 Trend summary sent successfully!")
+            return True
+        else:
+            print("💥 Failed to send email")
+            return False
+    return False

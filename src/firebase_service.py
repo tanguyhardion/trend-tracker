@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 
-FIREBASE_CRED_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'firebase_creds.json')
+FIREBASE_CRED_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'service_account_key.json')
 
 firebase_app = None
 db = None

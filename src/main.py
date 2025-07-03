@@ -18,11 +18,9 @@ def run_trend_tracker():
     # Fetch trends
     print("📊 Fetching trends from getdaytrends.com...")
     fetch_result = trend_fetcher.fetch_trends()
-    print(f"[DEBUG] fetch_trends() returned: {[type(x) for x in fetch_result]}")
     trends = fetch_result[0]
     most_tweeted_trends = fetch_result[3] if len(fetch_result) > 3 else None
     longest_trending_trends = fetch_result[4] if len(fetch_result) > 4 else None
-    print(f"[DEBUG] trends: {len(trends) if trends else 0}, most_tweeted_trends: {len(most_tweeted_trends) if most_tweeted_trends else 0}, longest_trending_trends: {len(longest_trending_trends) if longest_trending_trends else 0}")
 
     if not trends:
         print("❌ Failed to fetch trends")
@@ -51,7 +49,6 @@ def run_trend_tracker():
             send_email = False
     if send_email:
         print("📧 Sending email...")
-        print(f"[DEBUG] Sending with most_tweeted_trends: {len(most_tweeted_trends) if most_tweeted_trends else 0}, longest_trending_trends: {len(longest_trending_trends) if longest_trending_trends else 0}")
         success = email_service.send_notification(trends, timestamp_str, most_tweeted_trends, longest_trending_trends)
         if success:
             trends_doc.set({"trend_names": current_trend_names, "timestamp": timestamp_str})

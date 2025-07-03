@@ -26,9 +26,9 @@ jobs:
         pip install -r requirements.txt
     
     - name: Write Firebase credentials to file
-      run: echo "$FIREBASE_CREDENTIALS_JSON" > service_account_key.json
+      run: echo "$SERVICE_ACCOUNT_KEY" > service_account_key.json
       env:
-        FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
+        SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
     
     - name: Run trend tracker
       env:

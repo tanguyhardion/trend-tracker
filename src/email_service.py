@@ -30,6 +30,7 @@ class EmailService:
         timestamp: str,
         most_tweeted_trends: List[Dict[str, Any]] = None,
         longest_trending_trends: List[Dict[str, Any]] = None,
+        timestamp_long: str = None,
     ) -> MIMEMultipart:
         """Create the email message with HTML content."""
         message = MIMEMultipart("alternative")
@@ -39,7 +40,7 @@ class EmailService:
 
         # Generate HTML content
         html_body = self.html_generator.generate_email_html(
-            trends, timestamp, most_tweeted_trends, longest_trending_trends
+            trends, timestamp, most_tweeted_trends, longest_trending_trends, timestamp_long
         )
         html_part = MIMEText(html_body, "html")
         message.attach(html_part)
@@ -59,15 +60,17 @@ class EmailService:
         timestamp: str,
         most_tweeted_trends: List[Dict[str, Any]] = None,
         longest_trending_trends: List[Dict[str, Any]] = None,
+        timestamp_long: str = None,
     ) -> bool:
         """
         Send email notification for detected trends.
 
         Args:
             trends: List of trend dictionaries
-            timestamp: Timestamp string for the email
+            timestamp: Timestamp string for the email subject (short format)
             most_tweeted_trends: List of most tweeted trend dictionaries
             longest_trending_trends: List of longest trending trend dictionaries
+            timestamp_long: Long format timestamp for email body (optional)
 
         Returns:
             bool: True if email was sent successfully, False otherwise
@@ -79,7 +82,7 @@ class EmailService:
             return False
 
         try:
-            message = self._create_email_message(trends, timestamp, most_tweeted_trends, longest_trending_trends)
+            message = self._create_email_message(trends, timestamp, most_tweeted_trends, longest_trending_trends, timestamp_long)
             self._send_via_smtp(message)
             print(f"✅ Email notification sent to {Config.RECIPIENT_EMAIL}")
             return True

@@ -107,6 +107,7 @@ class HTMLGenerator:
         timestamp: str,
         most_tweeted_trends: List[Dict[str, Any]] = None,
         longest_trending_trends: List[Dict[str, Any]] = None,
+        timestamp_long: str = None,
     ) -> str:
         css_content = self._load_css()
         trends_container = self._create_trends_container(trends)
@@ -116,6 +117,9 @@ class HTMLGenerator:
         longest_trending_container = self._create_longest_trending_container(
             longest_trending_trends or []
         )
+        # Use long timestamp for body if provided, otherwise fallback to short timestamp
+        body_timestamp = timestamp_long if timestamp_long else timestamp
+        
         return f"""
             <html>
             <head>
@@ -128,7 +132,7 @@ class HTMLGenerator:
                 {most_tweeted_container}
                 {longest_trending_container}
                 <div class="timestamp">
-                    <strong>Timestamp:</strong> {timestamp}
+                    <strong>Timestamp:</strong> {body_timestamp}
                 </div>
                 <div class="footer">
                     <p><em>This is an automated notification from your trend tracking system.</em></p>

@@ -33,10 +33,11 @@ def run_trend_tracker():
     if longest_trending_trends:
         print(f"✅ Found {len(longest_trending_trends)} longest trending trends")
 
-    # Get current timestamp for email in a human-readable format
+    # Get current timestamp for email in both short and long formats
     paris_tz = pytz.timezone('Europe/Paris')
     now = datetime.now(paris_tz)
-    timestamp_str = now.strftime("Today at %I:%M %p")
+    timestamp_str = now.strftime("Today at %I:%M %p")  # Short format for subject
+    timestamp_long_str = now.strftime("%A, %B %d, %Y at %I:%M %p")  # Long format for body
 
     # Store and check trends in Firestore
     trends_collection = db.collection("trend_snapshots")
@@ -51,7 +52,7 @@ def run_trend_tracker():
             send_email = False
     if send_email:
         print("📧 Sending email...")
-        success = email_service.send_notification(trends, timestamp_str, most_tweeted_trends, longest_trending_trends)
+        success = email_service.send_notification(trends, timestamp_str, most_tweeted_trends, longest_trending_trends, timestamp_long_str)
         if success:
             trends_doc.set({"trend_names": current_trend_names, "timestamp": timestamp_str})
             print("🎉 Trend summary sent successfully!")

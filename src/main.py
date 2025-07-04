@@ -1,5 +1,6 @@
 """Main entry point for the trend tracker."""
 from datetime import datetime
+import pytz
 
 from .trend_fetcher import TrendFetcher
 from .email_service import EmailService
@@ -33,7 +34,8 @@ def run_trend_tracker():
         print(f"✅ Found {len(longest_trending_trends)} longest trending trends")
 
     # Get current timestamp for email in a human-readable format
-    now = datetime.now()
+    paris_tz = pytz.timezone('Europe/Paris')
+    now = datetime.now(paris_tz)
     timestamp_str = now.strftime("Today at %I:%M %p")
 
     # Store and check trends in Firestore

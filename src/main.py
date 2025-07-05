@@ -36,7 +36,7 @@ def run_trend_tracker():
     # Get current timestamp for email in both short and long formats
     paris_tz = pytz.timezone('Europe/Paris')
     now = datetime.now(paris_tz)
-    timestamp_str = now.strftime("Today at %I:%M %p")  # Short format for subject
+    timestamp_str = now.strftime("%I:%M %p")  # Short format for subject
     timestamp_long_str = now.strftime("%A, %B %d, %Y at %I:%M %p")  # Long format for body
 
     # Store and check trends in Firestore

@@ -34,7 +34,7 @@ class EmailService:
     ) -> MIMEMultipart:
         """Create the email message with HTML content."""
         message = MIMEMultipart("alternative")
-        message["Subject"] = f"US Trends Summary - {timestamp}"
+        message["Subject"] = f"US Trends - {timestamp}"
         message["From"] = Config.GMAIL_EMAIL
         message["To"] = Config.RECIPIENT_EMAIL
 
